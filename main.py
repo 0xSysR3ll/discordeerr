@@ -17,9 +17,9 @@ from config import Config
 from database.database import Database
 from seerr.api import SeerrAPI
 
-log_level = os.getenv("LOG_LEVEL", "INFO").upper()
+
 logging.basicConfig(
-    level=getattr(logging, log_level, logging.INFO),
+    level=getattr(logging, Config.LOG_LEVEL, logging.INFO),
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     handlers=[
         RotatingFileHandler(

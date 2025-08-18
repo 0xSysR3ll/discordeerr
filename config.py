@@ -20,4 +20,5 @@ class Config:
 
     NOTIFICATION_CHANNEL_ID = int(os.getenv("NOTIFICATION_CHANNEL_ID", 0))
 
+    LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
     DEBUG_MODE = os.getenv("DEBUG_MODE", "False").lower() == "true"
