@@ -17,7 +17,6 @@ from config import Config
 from database.database import Database
 from seerr.api import SeerrAPI
 
-
 logging.basicConfig(
     level=getattr(logging, Config.LOG_LEVEL, logging.INFO),
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",

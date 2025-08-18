@@ -214,12 +214,6 @@ class SeerrCommands(commands.Cog):
                 inline=True,
             )
 
-            embed.add_field(
-                name="Account Status",
-                value="Active" if account["is_active"] else "Inactive",
-                inline=True,
-            )
-
             await interaction.response.send_message(embed=embed, ephemeral=True)
 
         except Exception as e:

@@ -113,7 +113,7 @@ class AdminCommands(commands.Cog):
                     SELECT ja.*, u.username as discord_username
                     FROM seerr_accounts ja
                     JOIN users u ON ja.discord_id = u.discord_id
-                    WHERE ja.is_active = TRUE
+                    WHERE ja.discord_id IS NOT NULL
                     ORDER BY ja.linked_at DESC
                 """
                 )
@@ -600,11 +600,6 @@ class AdminCommands(commands.Cog):
                 embed.add_field(
                     name="Linked At",
                     value=linked_account["linked_at"],
-                    inline=True,
-                )
-                embed.add_field(
-                    name="Active",
-                    value=" Yes" if linked_account["is_active"] else "No",
                     inline=True,
                 )
             else:

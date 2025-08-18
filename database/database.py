@@ -368,7 +368,7 @@ class Database:
                     """
                     SELECT u.*, ja.seerr_username, ja.seerr_user_id, ja.linked_at
                     FROM users u
-                    LEFT JOIN seerr_accounts ja ON u.discord_id = ja.discord_id AND ja.is_active = TRUE
+                    LEFT JOIN seerr_accounts ja ON u.discord_id = ja.discord_id
                     ORDER BY u.last_seen DESC
                 """
                 )
@@ -399,7 +399,7 @@ class Database:
                 cursor.execute(
                     """
                     SELECT * FROM seerr_accounts
-                    WHERE discord_id = ? AND is_active = TRUE
+                    WHERE discord_id = ?
                     ORDER BY linked_at DESC
                     LIMIT 1
                 """,
