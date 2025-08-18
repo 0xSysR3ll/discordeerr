@@ -1,0 +1,2 @@
+# This file ensures the data directory is tracked in git
+# The data directory contains logs and database files

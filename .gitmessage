@@ -1,0 +1,41 @@
+# Conventional Commit Message Template
+# 
+# Format: type(scope): description
+#
+# Types:
+#   feat     - New feature
+#   fix      - Bug fix
+#   docs     - Documentation changes
+#   style    - Code style changes (formatting, etc.)
+#   refactor - Code refactoring
+#   test     - Adding or updating tests
+#   chore    - Maintenance tasks
+#   perf     - Performance improvements
+#   ci       - CI/CD changes
+#   build    - Build system changes
+#   revert   - Revert previous commit
+#
+# Examples:
+#   feat(auth): add OAuth2 authentication
+#   fix(logging): resolve log rotation issues
+#   docs(readme): update installation instructions
+#   refactor(api): simplify user endpoint logic
+#   chore(deps): update dependencies to latest versions
+#
+# Body (optional):
+#   - Explain what and why, not how
+#   - Use imperative mood ("add" not "added")
+#   - Reference issues if applicable
+#
+# Footer (optional):
+#   - Breaking changes: "BREAKING CHANGE: description"
+#   - Issue references: "Closes #123", "Fixes #456"
+
+type(scope): description
+
+# Body (optional)
+# Explain what and why, not how
+
+# Footer (optional)
+# Breaking changes: BREAKING CHANGE: description
+# Issue references: Closes #123, Fixes #456

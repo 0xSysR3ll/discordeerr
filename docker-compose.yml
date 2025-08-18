@@ -1,0 +1,27 @@
+version: "3.8"
+
+services:
+  discordeerr:
+    image: ghcr.io/0xsysr3ll/discordeerr:latest
+    container_name: discordeerr
+    restart: unless-stopped
+    ports:
+      - "5000:5000" # Webhook port
+    volumes:
+      - ./data/logs:/app/data/logs # Persistent logs
+      - ./data/database:/app/data/database # Persistent database
+      - ./.env:/app/.env:ro # Environment variables
+    environment:
+      - TZ=UTC
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import requests; requests.get('http://localhost:5000/health', timeout=5)",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s

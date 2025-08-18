@@ -1,0 +1,70 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: read
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Generate Release Notes
+        id: release_notes
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/}
+          VERSION_CLEAN=${VERSION#v}
+
+          # Initialize release notes
+          RELEASE_NOTES=""
+
+          if [ -f CHANGELOG.md ]; then
+            # Extract version section from changelog
+            SECTION=$(sed -n "/^## \[${VERSION_CLEAN}\]/,/^## /p" CHANGELOG.md | sed '$d')
+            if [ -n "$SECTION" ]; then
+              RELEASE_NOTES="$SECTION"
+            fi
+          fi
+
+          # If no changelog entry found, generate from git commits
+          if [ -z "$RELEASE_NOTES" ]; then
+            PREV_TAG=$(git tag --sort=-version:refname | grep -A1 "^${VERSION}$" | tail -n1)
+            if [ -n "$PREV_TAG" ] && [ "$PREV_TAG" != "$VERSION" ]; then
+              RANGE="${PREV_TAG}..${VERSION}"
+            else
+              # First release, use all commits
+              RANGE=$(git rev-list --max-parents=0 HEAD)..${VERSION}
+            fi
+            
+            RELEASE_NOTES="## What's Changed"$'\n\n'
+            git log --pretty=format:"* %s" "$RANGE" | head -20 >> /tmp/commits.txt
+            if [ -s /tmp/commits.txt ]; then
+              RELEASE_NOTES+=$(cat /tmp/commits.txt)
+            else
+              RELEASE_NOTES+="* Initial release"
+            fi
+          fi
+
+          # Set output using proper multiline format
+          {
+            echo "notes<<EOF"
+            echo "$RELEASE_NOTES"
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Discordeerr ${{ github.ref_name }}
+          body: ${{ steps.release_notes.outputs.notes }}
+          draft: false
+          prerelease: ${{ contains(github.ref_name, '-') }}
+          generate_release_notes: true

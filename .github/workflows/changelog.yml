@@ -1,0 +1,130 @@
+name: Update Changelog
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  update-changelog:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Git
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "GitHub Actions Bot"
+
+      - name: Switch to main branch
+        run: |
+          git fetch origin main
+          git checkout main
+          git pull origin main
+
+      - name: Update Changelog
+        id: changelog
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/}
+          VERSION_CLEAN=${VERSION#v}
+          DATE=$(date +"%Y-%m-%d")
+
+          # Create CHANGELOG.md if it doesn't exist
+          if [ ! -f CHANGELOG.md ]; then
+            cat > CHANGELOG.md << 'EOL'
+          # Changelog
+
+          All notable changes to this project will be documented in this file.
+
+          The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+          and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+          ## [Unreleased]
+
+          EOL
+          fi
+
+          # Check if this version already exists in changelog
+          if grep -q "## \[${VERSION_CLEAN}\]" CHANGELOG.md; then
+            echo "Version ${VERSION_CLEAN} already exists in changelog"
+            echo "updated=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # Get previous tag for comparison
+          PREV_TAG=$(git tag --sort=-version:refname | grep -v "^${VERSION}$" | head -n1)
+
+          # Generate changelog entry
+          TEMP_FILE=$(mktemp)
+
+          # Add header with existing content up to [Unreleased]
+          sed -n '1,/## \[Unreleased\]/p' CHANGELOG.md > "$TEMP_FILE"
+
+          # Add new version section
+          echo "" >> "$TEMP_FILE"
+          echo "## [${VERSION_CLEAN}] - ${DATE}" >> "$TEMP_FILE"
+          echo "" >> "$TEMP_FILE"
+
+          # Generate changes from git commits
+          if [ -n "$PREV_TAG" ]; then
+            RANGE="${PREV_TAG}..${VERSION}"
+          else
+            # First release - get all commits
+            RANGE=$(git rev-list --max-parents=0 HEAD)..${VERSION}
+          fi
+
+          # Categorize commits
+          ADDED=$(git log --pretty=format:"- %s" "$RANGE" | grep -i "^- \(feat\|add\)" || true)
+          CHANGED=$(git log --pretty=format:"- %s" "$RANGE" | grep -i "^- \(change\|update\|improve\)" || true)
+          FIXED=$(git log --pretty=format:"- %s" "$RANGE" | grep -i "^- \(fix\|bug\)" || true)
+          OTHER=$(git log --pretty=format:"- %s" "$RANGE" | grep -vi "^- \(feat\|add\|change\|update\|improve\|fix\|bug\)" || true)
+
+          if [ -n "$ADDED" ]; then
+            echo "### Added" >> "$TEMP_FILE"
+            echo "$ADDED" >> "$TEMP_FILE"
+            echo "" >> "$TEMP_FILE"
+          fi
+
+          if [ -n "$CHANGED" ]; then
+            echo "### Changed" >> "$TEMP_FILE"
+            echo "$CHANGED" >> "$TEMP_FILE"
+            echo "" >> "$TEMP_FILE"
+          fi
+
+          if [ -n "$FIXED" ]; then
+            echo "### Fixed" >> "$TEMP_FILE"
+            echo "$FIXED" >> "$TEMP_FILE"
+            echo "" >> "$TEMP_FILE"
+          fi
+
+          if [ -n "$OTHER" ]; then
+            echo "### Other" >> "$TEMP_FILE"
+            echo "$OTHER" >> "$TEMP_FILE"
+            echo "" >> "$TEMP_FILE"
+          fi
+
+          # Add rest of the file (skip the [Unreleased] section we already added)
+          sed -n '/## \[Unreleased\]/,$p' CHANGELOG.md | tail -n +2 >> "$TEMP_FILE"
+
+          # Replace original file
+          mv "$TEMP_FILE" CHANGELOG.md
+
+          echo "updated=true" >> $GITHUB_OUTPUT
+
+      - name: Commit and push changelog
+        if: steps.changelog.outputs.updated == 'true'
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/}
+          git add CHANGELOG.md
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "docs: update changelog for ${VERSION}"
+            git push origin main
+          fi
