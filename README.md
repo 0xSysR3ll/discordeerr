@@ -7,6 +7,8 @@
 [![Discord.py](https://img.shields.io/badge/discord.py-2.3+-blue.svg)](https://github.com/Rapptz/discord.py)
 [![Docker](https://img.shields.io/badge/docker-ghcr.io/0xsysr3ll/discordeerr-blue.svg)](https://github.com/0xSysR3ll/discordeerr/pkgs/container/discordeerr)
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/0xSysR3ll/discordeerr)](https://github.com/0xSysR3ll/discordeerr/releases)
+[![Release](https://github.com/0xsysr3ll/discordeerr/actions/workflows/release.yml/badge.svg)]
+[![CI](https://github.com/0xsysr3ll/discordeerr/actions/workflows/ci.yml/badge.svg)]
 [![GitHub issues](https://img.shields.io/github/issues/0xSysR3ll/discordeerr)](https://github.com/0xSysR3ll/discordeerr/issues)
 [![GitHub pull requests](https://img.shields.io/github/issues-pr/0xSysR3ll/discordeerr)](https://github.com/0xSysR3ll/discordeerr/pulls)
 
